@@ -92,7 +92,14 @@ def mysql_stockQFQ( db, cursor, pro, itx, stock_pool,
     df = ts.pro_bar( ts_code=stock_pool[ itx ], asset='E',
                      api=pro, adj='qfq', freq='D',
                      start_date=start_dt, end_date=end_dt )
-                     
+   
+    #-------modified by Lu Xiaoxi----
+     if df is None:   #针对新股，有些数据还没更新
+        itx = itx + 1
+        df = ts.pro_bar(ts_code=stock_pool[itx], asset='E',
+                        api=pro, adj='qfq', freq='D',
+                        start_date=start_dt, end_date=end_dt) 
+      
     #-------modified by mumu-2014 on Dec. 14, 2019 in Shanghai, China----
     if len( df ) == 4000: #最多下载4000条记录
         last_download_date = df[ 'trade_date' ].iloc[ -1 ]
@@ -103,7 +110,9 @@ def mysql_stockQFQ( db, cursor, pro, itx, stock_pool,
         df2 = ts.pro_bar( ts_code=stock_pool[ itx ], asset='E',
                          api=pro, adj='qfq', freq='D',
                          start_date=start_dt, end_date=last_download_date )
-
+   
+    #-------modified by Lu Xiaoxi---- 
+    if df2 is not None： #针对有些股票某天正好是100条数据
         if len(df2 ) > 0:
             df = pd.concat( [ df, df2 ], axis=0 )
 
